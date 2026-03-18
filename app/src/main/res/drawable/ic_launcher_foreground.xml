@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Blue background fill (within safe zone) -->
+    <path
+        android:fillColor="#1565C0"
+        android:pathData="M0,0 L108,0 L108,108 L0,108 Z" />
+
+    <!-- Clock outer ring -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="3.5"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M54,22 m-22,0 a22,22 0,1,0 44,0 a22,22 0,1,0 -44,0" />
+
+    <!-- Hour hand (pointing up) -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round"
+        android:pathData="M54,44 L54,28" />
+
+    <!-- Minute hand (pointing to 2 o'clock) -->
+    <path
+        android:strokeColor="#00C9A7"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:pathData="M54,44 L68,36" />
+
+    <!-- Center dot -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,44 m-3,0 a3,3 0,1,0 6,0 a3,3 0,1,0 -6,0" />
+
+    <!-- Bell body (teal accent below clock) -->
+    <path
+        android:fillColor="#00C9A7"
+        android:pathData="M54,73 C50.8,73 48.2,75 47.4,77.8 C44.3,79 42,81.8 42,85 L42,88 L66,88 L66,85 C66,81.8 63.7,79 60.6,77.8 C59.8,75 57.2,73 54,73 Z" />
+
+    <path
+        android:fillColor="#00C9A7"
+        android:pathData="M50.5,89 C50.5,91.5 52.1,93 54,93 C55.9,93 57.5,91.5 57.5,89 Z" />
+
+</vector>

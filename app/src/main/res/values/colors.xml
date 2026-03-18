@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand colors for use in XML (full palette in Color.kt for Compose) -->
+    <color name="blue_700">#1565C0</color>
+    <color name="teal_400">#00C9A7</color>
+    <color name="white">#FFFFFF</color>
+    <color name="background">#F5F9FF</color>
+    <color name="splash_background">#1565C0</color>
+</resources>
