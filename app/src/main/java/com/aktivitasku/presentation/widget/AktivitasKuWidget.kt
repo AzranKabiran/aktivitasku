@@ -227,20 +227,12 @@ suspend fun refreshWidgetData(context: Context) {
 
     val jsonStr = Json.encodeToString(items)
 
-    GlanceAppWidgetManager(context)
-        .getGlanceIds(AktivitasKuWidget::class.java)
-        .forEach { id ->
-            updateAppWidgetState<Preferences>(context, PreferencesGlanceStateDefinition, id) { prefs ->
-                prefs.toMutablePreferences().apply { set(KEY_ITEMS, jsonStr) }
-            }
-            AktivitasKuWidget().update(context, id)
-        }
-}
+    val glanceIds = GlanceAppWidgetManager(context)
+    .getGlanceIds(AktivitasKuWidget::class.java)
 
-private fun ActivityCategory.widgetColor(): Int = when (this) {
-    ActivityCategory.WORK     -> 0xFF1565C0.toInt()
-    ActivityCategory.PERSONAL -> 0xFF00C9A7.toInt()
-    ActivityCategory.HEALTH   -> 0xFFE91E63.toInt()
-    ActivityCategory.STUDY    -> 0xFF9C27B0.toInt()
-    ActivityCategory.OTHER    -> 0xFFFFA726.toInt()
+for (id in glanceIds) {
+    updateAppWidgetState<Preferences>(context, PreferencesGlanceStateDefinition, id) { prefs ->
+        prefs.toMutablePreferences().apply { set(KEY_ITEMS, jsonStr) }
+    }
+    AktivitasKuWidget().update(context, id)
 }
