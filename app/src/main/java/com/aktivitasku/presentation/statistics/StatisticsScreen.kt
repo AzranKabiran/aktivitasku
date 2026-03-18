@@ -67,7 +67,7 @@ fun StatisticsScreen(
                 StreakCard(
                     value    = uiState.currentStreak,
                     label    = "Streak Sekarang",
-                    icon     = Icons.Rounded.LocalFire,
+                    icon     = Icons.Rounded.Whatshot,
                     color    = Error,
                     modifier = Modifier.weight(1f)
                 )

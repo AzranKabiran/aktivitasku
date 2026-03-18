@@ -41,7 +41,7 @@ data class BottomNavItem(
 val bottomNavItems = listOf(
     BottomNavItem(Screen.Home,       "Beranda",   Icons.Rounded.HomeWork,  Icons.Rounded.Home),
     BottomNavItem(Screen.Statistics, "Statistik", Icons.Rounded.BarChart,  Icons.Rounded.BarChart),
-    BottomNavItem(Screen.Settings,   "Setelan",   Icons.Rounded.TuneOutlined, Icons.Rounded.Tune)
+    BottomNavItem(Screen.Settings,   "Setelan",   Icons.Rounded.Settings, Icons.Rounded.Settings)
 )
 
 @Composable
