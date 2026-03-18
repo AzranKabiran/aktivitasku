@@ -7,20 +7,31 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.glance.*
-import androidx.glance.action.actionStartActivity
+import androidx.glance.GlanceId
+import androidx.glance.GlanceModifier
 import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.provideContent
 import androidx.glance.appwidget.state.updateAppWidgetState
-import androidx.glance.layout.*
+import androidx.glance.background
+import androidx.glance.currentState
+import androidx.glance.layout.Alignment
+import androidx.glance.layout.Box
+import androidx.glance.layout.Column
+import androidx.glance.layout.Row
+import androidx.glance.layout.Spacer
+import androidx.glance.layout.fillMaxSize
+import androidx.glance.layout.fillMaxWidth
+import androidx.glance.layout.height
+import androidx.glance.layout.padding
+import androidx.glance.layout.width
 import androidx.glance.state.GlanceStateDefinition
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import com.aktivitasku.MainActivity
 import com.aktivitasku.data.repository.ActivityRepository
 import com.aktivitasku.domain.model.ActivityCategory
 import dagger.hilt.EntryPoint
@@ -58,23 +69,21 @@ class AktivitasKuWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
-            val prefs = currentState<Preferences>()
-            val json  = prefs[KEY_ITEMS] ?: "[]"
-            val items = runCatching {
+            val prefs     = currentState<Preferences>()
+            val json      = prefs[KEY_ITEMS] ?: "[]"
+            val items     = runCatching {
                 Json.decodeFromString<List<WidgetItem>>(json)
             }.getOrDefault(emptyList())
-
             val dateLabel = LocalDate.now().format(
                 DateTimeFormatter.ofPattern("EEE, d MMM", Locale("id"))
             )
-
-            WidgetContent(items = items, dateLabel = dateLabel, context = context)
+            WidgetContent(items = items, dateLabel = dateLabel)
         }
     }
 }
 
 @Composable
-private fun WidgetContent(items: List<WidgetItem>, dateLabel: String, context: Context) {
+private fun WidgetContent(items: List<WidgetItem>, dateLabel: String) {
     Box(
         modifier = GlanceModifier
             .fillMaxSize()
@@ -83,14 +92,14 @@ private fun WidgetContent(items: List<WidgetItem>, dateLabel: String, context: C
     ) {
         Column(modifier = GlanceModifier.fillMaxSize()) {
 
-            // Header
+            // Header row
             Row(
-                modifier = GlanceModifier.fillMaxWidth(),
+                modifier          = GlanceModifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text  = "AktivitasKu",
-                    style = TextStyle(
+                    text     = "AktivitasKu",
+                    style    = TextStyle(
                         color      = ColorProvider(Color(0xFF1565C0)),
                         fontSize   = 13.sp,
                         fontWeight = FontWeight.Bold
@@ -108,6 +117,7 @@ private fun WidgetContent(items: List<WidgetItem>, dateLabel: String, context: C
 
             Spacer(GlanceModifier.height(6.dp))
 
+            // Divider
             Box(
                 modifier = GlanceModifier
                     .fillMaxWidth()
@@ -127,7 +137,38 @@ private fun WidgetContent(items: List<WidgetItem>, dateLabel: String, context: C
                 )
             } else {
                 items.take(3).forEach { item ->
-                    WidgetItemRow(item)
+                    Row(
+                        modifier          = GlanceModifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = GlanceModifier
+                                .width(3.dp)
+                                .height(30.dp)
+                                .background(ColorProvider(Color(item.categoryColor)))
+                        )
+                        Spacer(GlanceModifier.width(8.dp))
+                        Column(modifier = GlanceModifier.defaultWeight()) {
+                            Text(
+                                text     = item.title,
+                                style    = TextStyle(
+                                    color    = ColorProvider(
+                                        if (item.isCompleted) Color(0xFF8B8FA8)
+                                        else Color(0xFF1A1C2A)
+                                    ),
+                                    fontSize = 12.sp
+                                ),
+                                maxLines = 1
+                            )
+                            Text(
+                                text  = item.time,
+                                style = TextStyle(
+                                    color    = ColorProvider(Color(0xFF8B8FA8)),
+                                    fontSize = 10.sp
+                                )
+                            )
+                        }
+                    }
                     Spacer(GlanceModifier.height(6.dp))
                 }
             }
@@ -150,53 +191,7 @@ private fun WidgetContent(items: List<WidgetItem>, dateLabel: String, context: C
     }
 }
 
-@Composable
-private fun WidgetItemRow(item: WidgetItem) {
-    val catColor  = Color(item.categoryColor)
-    val textColor = if (item.isCompleted) Color(0xFF8B8FA8) else Color(0xFF1A1C2A)
-
-    Row(
-        modifier          = GlanceModifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = GlanceModifier
-                .width(3.dp)
-                .height(32.dp)
-                .background(ColorProvider(catColor))
-        )
-        Spacer(GlanceModifier.width(8.dp))
-        Column(modifier = GlanceModifier.defaultWeight()) {
-            Text(
-                text     = item.title,
-                style    = TextStyle(
-                    color      = ColorProvider(textColor),
-                    fontSize   = 12.sp,
-                    fontWeight = if (item.isCompleted) FontWeight.Normal else FontWeight.Medium
-                ),
-                maxLines = 1
-            )
-            Text(
-                text  = item.time,
-                style = TextStyle(
-                    color    = ColorProvider(Color(0xFF8B8FA8)),
-                    fontSize = 10.sp
-                )
-            )
-        }
-        if (item.isCompleted) {
-            Text(
-                "✓",
-                style = TextStyle(
-                    color      = ColorProvider(Color(0xFF00C9A7)),
-                    fontSize   = 13.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            )
-        }
-    }
-}
-
+// Receiver
 class AktivitasKuWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget = AktivitasKuWidget()
 }
@@ -209,30 +204,40 @@ suspend fun refreshWidgetData(context: Context) {
     )
     val repo  = entryPoint.activityRepository()
     val today = LocalDate.now()
-
-    val activities = repo.observeByDateRange(
+    val items = repo.observeByDateRange(
         start = today.atStartOfDay(),
         end   = today.plusDays(1).atStartOfDay()
-    ).first()
-
-    val items = activities.map { a ->
+    ).first().map { a ->
         WidgetItem(
             id            = a.id,
             title         = a.title,
             time          = a.startDateTime.format(DateTimeFormatter.ofPattern("HH:mm")),
-            categoryColor = a.category.widgetColor(),
+            categoryColor = a.category.toWidgetColor(),
             isCompleted   = a.isCompleted
         )
     }
 
     val jsonStr = Json.encodeToString(items)
+    GlanceAppWidgetManager(context)
+        .getGlanceIds(AktivitasKuWidget::class.java)
+        .forEach { glanceId ->
+            updateAppWidgetState<Preferences>(
+                context,
+                PreferencesGlanceStateDefinition,
+                glanceId
+            ) { prefs ->
+                prefs.toMutablePreferences().apply {
+                    set(KEY_ITEMS, jsonStr)
+                }
+            }
+            AktivitasKuWidget().update(context, glanceId)
+        }
+}
 
-    val glanceIds = GlanceAppWidgetManager(context)
-    .getGlanceIds(AktivitasKuWidget::class.java)
-
-for (id in glanceIds) {
-    updateAppWidgetState<Preferences>(context, PreferencesGlanceStateDefinition, id) { prefs ->
-        prefs.toMutablePreferences().apply { set(KEY_ITEMS, jsonStr) }
-    }
-    AktivitasKuWidget().update(context, id)
+private fun ActivityCategory.toWidgetColor(): Int = when (this) {
+    ActivityCategory.WORK     -> 0xFF1565C0.toInt()
+    ActivityCategory.PERSONAL -> 0xFF00C9A7.toInt()
+    ActivityCategory.HEALTH   -> 0xFFE91E63.toInt()
+    ActivityCategory.STUDY    -> 0xFF9C27B0.toInt()
+    ActivityCategory.OTHER    -> 0xFFFFA726.toInt()
 }
