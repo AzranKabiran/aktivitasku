@@ -123,7 +123,7 @@ private fun WidgetContent(items: List<WidgetItem>, dateLabel: String) {
                     .fillMaxWidth()
                     .height(1.dp)
                     .background(ColorProvider(Color(0xFFDFECFF)))
-            )
+            ){}
 
             Spacer(GlanceModifier.height(8.dp))
 
@@ -146,7 +146,7 @@ private fun WidgetContent(items: List<WidgetItem>, dateLabel: String) {
                                 .width(3.dp)
                                 .height(30.dp)
                                 .background(ColorProvider(Color(item.categoryColor)))
-                        )
+                        ){}
                         Spacer(GlanceModifier.width(8.dp))
                         Column(modifier = GlanceModifier.defaultWeight()) {
                             Text(
