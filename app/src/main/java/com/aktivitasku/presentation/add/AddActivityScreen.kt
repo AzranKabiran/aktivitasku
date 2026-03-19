@@ -555,10 +555,15 @@ private fun TimePickerField(time: LocalTime, onSelect: (LocalTime) -> Unit, modi
 
 @Composable
 private fun inputColors() = OutlinedTextFieldDefaults.colors(
-    focusedBorderColor    = Blue700,
-    unfocusedBorderColor  = MaterialTheme.colorScheme.outlineVariant,
-    focusedContainerColor = MaterialTheme.colorScheme.surface,
-    unfocusedContainerColor = MaterialTheme.colorScheme.surface
+    focusedBorderColor       = Blue700,
+    unfocusedBorderColor     = MaterialTheme.colorScheme.outlineVariant,
+    focusedContainerColor    = MaterialTheme.colorScheme.surface,
+    unfocusedContainerColor  = MaterialTheme.colorScheme.surface,
+    disabledBorderColor      = MaterialTheme.colorScheme.outlineVariant,
+    disabledContainerColor   = MaterialTheme.colorScheme.surface,
+    disabledTextColor        = MaterialTheme.colorScheme.onSurface,
+    disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+    disabledLabelColor       = MaterialTheme.colorScheme.onSurfaceVariant
 )
 
 
