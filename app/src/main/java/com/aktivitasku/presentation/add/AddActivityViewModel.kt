@@ -93,7 +93,7 @@ class AddActivityViewModel @Inject constructor(
         speechRecognizer = null
         _uiState.update { it.copy(voiceState = VoiceState.IDLE) }
 
-        viewModelScope.launch {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.Main) {
             kotlinx.coroutines.delay(200)
             speechRecognizer = SpeechRecognizer.createSpeechRecognizer(ctx).apply {
             setRecognitionListener(object : RecognitionListener {
@@ -132,7 +132,7 @@ class AddActivityViewModel @Inject constructor(
             // Attempt offline recognition
             putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
         }
-        speechRecognizer?.startListening(intent)
+            speechRecognizer?.startListening(intent)
         } // end viewModelScope.launch
     }
 
