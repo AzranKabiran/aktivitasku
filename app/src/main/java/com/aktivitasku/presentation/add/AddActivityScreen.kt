@@ -123,16 +123,26 @@ fun AddActivityScreen(
 
             // ── Date & Time ───────────────────────────────
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                DatePickerField(
-                    date     = uiState.date,
-                    onSelect = viewModel::onDateChange,
-                    modifier = Modifier.weight(1f)
-                )
-                TimePickerField(
-                    time     = uiState.time,
-                    onSelect = viewModel::onTimeChange,
-                    modifier = Modifier.weight(1f)
-                )
+                OutlinedTextField(
+    value         = date.format(fmt),
+    onValueChange = {},
+    readOnly      = true,
+    label         = { Text("Tanggal") },
+    leadingIcon   = { Icon(Icons.Rounded.CalendarToday, null) },
+    shape         = RoundedCornerShape(14.dp),
+    colors        = inputColors(),
+    modifier      = modifier.clickable { showPicker = true }
+)
+                OutlinedTextField(
+    value         = time.format(fmt),
+    onValueChange = {},
+    readOnly      = true,
+    label         = { Text("Waktu") },
+    leadingIcon   = { Icon(Icons.Rounded.Schedule, null) },
+    shape         = RoundedCornerShape(14.dp),
+    colors        = inputColors(),
+    modifier      = modifier.clickable { showPicker = true }
+)
             }
 
             // ── Category ──────────────────────────────────
