@@ -90,7 +90,12 @@ class AddActivityViewModel @Inject constructor(
         }
 
         speechRecognizer?.destroy()
-        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(ctx).apply {
+        speechRecognizer = null
+        _uiState.update { it.copy(voiceState = VoiceState.IDLE) }
+
+        viewModelScope.launch {
+            kotlinx.coroutines.delay(200)
+            speechRecognizer = SpeechRecognizer.createSpeechRecognizer(ctx).apply {
             setRecognitionListener(object : RecognitionListener {
                 override fun onReadyForSpeech(p: Bundle?) {
                     _uiState.update { it.copy(voiceState = VoiceState.LISTENING) }
@@ -128,6 +133,7 @@ class AddActivityViewModel @Inject constructor(
             putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
         }
         speechRecognizer?.startListening(intent)
+        } // end viewModelScope.launch
     }
 
     fun stopVoiceInput() {
