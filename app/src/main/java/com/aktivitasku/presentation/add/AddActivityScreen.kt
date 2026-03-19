@@ -4,7 +4,6 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -15,13 +14,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import java.time.Instant
-import java.time.ZoneId
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.aktivitasku.domain.model.*
 import com.aktivitasku.presentation.components.CategoryChip
@@ -32,7 +27,7 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun AddActivityScreen(
     onNavigateBack: () -> Unit,
@@ -40,7 +35,6 @@ fun AddActivityScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    // Navigate back after save
     LaunchedEffect(uiState.savedSuccessfully) {
         if (uiState.savedSuccessfully) onNavigateBack()
     }
@@ -86,7 +80,6 @@ fun AddActivityScreen(
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // ── Voice Input Section ───────────────────────
             VoiceInputSection(
                 voiceState    = uiState.voiceState,
                 transcript    = uiState.voiceTranscript,
@@ -97,7 +90,6 @@ fun AddActivityScreen(
 
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-            // ── Title ─────────────────────────────────────
             OutlinedTextField(
                 value         = uiState.title,
                 onValueChange = viewModel::onTitleChange,
@@ -110,7 +102,6 @@ fun AddActivityScreen(
                 modifier      = Modifier.fillMaxWidth()
             )
 
-            // ── Description ───────────────────────────────
             OutlinedTextField(
                 value         = uiState.description,
                 onValueChange = viewModel::onDescChange,
@@ -122,31 +113,19 @@ fun AddActivityScreen(
                 modifier      = Modifier.fillMaxWidth()
             )
 
-            // ── Date & Time ───────────────────────────────
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-    value         = date.format(fmt),
-    onValueChange = {},
-    readOnly      = true,
-    label         = { Text("Tanggal") },
-    leadingIcon   = { Icon(Icons.Rounded.CalendarToday, null) },
-    shape         = RoundedCornerShape(14.dp),
-    colors        = inputColors(),
-    modifier      = modifier.clickable { showPicker = true }
-)
-                OutlinedTextField(
-    value         = time.format(fmt),
-    onValueChange = {},
-    readOnly      = true,
-    label         = { Text("Waktu") },
-    leadingIcon   = { Icon(Icons.Rounded.Schedule, null) },
-    shape         = RoundedCornerShape(14.dp),
-    colors        = inputColors(),
-    modifier      = modifier.clickable { showPicker = true }
-)
+                DatePickerField(
+                    date     = uiState.date,
+                    onSelect = viewModel::onDateChange,
+                    modifier = Modifier.weight(1f)
+                )
+                TimePickerField(
+                    time     = uiState.time,
+                    onSelect = viewModel::onTimeChange,
+                    modifier = Modifier.weight(1f)
+                )
             }
 
-            // ── Category ──────────────────────────────────
             FormSection(title = "Kategori") {
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
@@ -168,7 +147,6 @@ fun AddActivityScreen(
                 }
             }
 
-            // ── Priority ──────────────────────────────────
             FormSection(title = "Prioritas") {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Priority.values().forEach { prio ->
@@ -190,7 +168,6 @@ fun AddActivityScreen(
                 }
             }
 
-            // ── Reminders ─────────────────────────────────
             FormSection(title = "Ingatkan Saya") {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     ReminderOptions.OPTIONS.chunked(2).forEach { row ->
@@ -213,11 +190,11 @@ fun AddActivityScreen(
                 }
             }
 
-            // ── Repeat ────────────────────────────────────
             FormSection(title = "Pengulangan") {
-                Row(
+                FlowRow(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     RepeatType.values().forEach { type ->
                         FilterChip(
@@ -263,8 +240,6 @@ fun AddActivityScreen(
     }
 }
 
-// ── Voice Input Section ───────────────────────────────────
-
 @Composable
 private fun VoiceInputSection(
     voiceState: VoiceState,
@@ -297,7 +272,6 @@ private fun VoiceInputSection(
 
             Spacer(Modifier.height(16.dp))
 
-            // Mic button with animated state
             val btnScale by animateFloatAsState(
                 targetValue = if (voiceState == VoiceState.LISTENING) 1.1f else 1f,
                 label       = "micScale"
@@ -307,7 +281,6 @@ private fun VoiceInputSection(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier.size(80.dp)
             ) {
-                // Pulse rings when listening
                 if (voiceState == VoiceState.LISTENING) {
                     PulseRing(delay = 0)
                     PulseRing(delay = 400)
@@ -406,8 +379,8 @@ private fun PulseRing(delay: Int) {
         initialValue   = 1f,
         targetValue    = 1.6f,
         animationSpec  = infiniteRepeatable(
-            animation  = androidx.compose.animation.core.tween(800, delayMillis = delay),
-            repeatMode = androidx.compose.animation.core.RepeatMode.Restart
+            animation  = tween(800, delayMillis = delay),
+            repeatMode = RepeatMode.Restart
         ),
         label = "pulseScale_$delay"
     )
@@ -415,8 +388,8 @@ private fun PulseRing(delay: Int) {
         initialValue   = 0.6f,
         targetValue    = 0f,
         animationSpec  = infiniteRepeatable(
-            animation  = androidx.compose.animation.core.tween(800, delayMillis = delay),
-            repeatMode = androidx.compose.animation.core.RepeatMode.Restart
+            animation  = tween(800, delayMillis = delay),
+            repeatMode = RepeatMode.Restart
         ),
         label = "pulseAlpha_$delay"
     )
@@ -428,8 +401,6 @@ private fun PulseRing(delay: Int) {
             .background(Error.copy(alpha = alpha))
     )
 }
-
-// ── Small helpers ─────────────────────────────────────────
 
 @Composable
 private fun FormSection(title: String, content: @Composable () -> Unit) {
@@ -449,7 +420,6 @@ private fun DatePickerField(date: LocalDate, onSelect: (LocalDate) -> Unit, modi
     val fmt = DateTimeFormatter.ofPattern("d MMM yyyy", Locale("id"))
     var showPicker by remember { mutableStateOf(false) }
 
-    // Prepare state with current date pre-selected
     val pickerState = rememberDatePickerState(
         initialSelectedDateMillis = date
             .atStartOfDay(java.time.ZoneId.systemDefault())
@@ -457,16 +427,24 @@ private fun DatePickerField(date: LocalDate, onSelect: (LocalDate) -> Unit, modi
             .toEpochMilli()
     )
 
-    OutlinedTextField(
-        value         = date.format(fmt),
-        onValueChange = {},
-        readOnly      = true,
-        label         = { Text("Tanggal") },
-        leadingIcon   = { Icon(Icons.Rounded.CalendarToday, null) },
-        shape         = RoundedCornerShape(14.dp),
-        colors        = inputColors(),
-        modifier      = modifier.clickable { showPicker = true }
-    )
+    Box(modifier = modifier) {
+        OutlinedTextField(
+            value         = date.format(fmt),
+            onValueChange = {},
+            readOnly      = true,
+            enabled       = false,
+            label         = { Text("Tanggal") },
+            leadingIcon   = { Icon(Icons.Rounded.CalendarToday, null) },
+            shape         = RoundedCornerShape(14.dp),
+            colors        = inputColors(),
+            modifier      = Modifier.fillMaxWidth()
+        )
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .clickable { showPicker = true }
+        )
+    }
 
     if (showPicker) {
         DatePickerDialog(
@@ -486,11 +464,11 @@ private fun DatePickerField(date: LocalDate, onSelect: (LocalDate) -> Unit, modi
                 TextButton(onClick = { showPicker = false }) { Text("Batal") }
             },
             colors = DatePickerDefaults.colors(
-                containerColor           = MaterialTheme.colorScheme.surface,
+                containerColor            = MaterialTheme.colorScheme.surface,
                 selectedDayContainerColor = Blue700,
-                selectedDayContentColor  = White,
-                todayDateBorderColor     = Blue700,
-                todayContentColor        = Blue700
+                selectedDayContentColor   = White,
+                todayDateBorderColor      = Blue700,
+                todayContentColor         = Blue700
             )
         ) {
             DatePicker(state = pickerState)
@@ -510,16 +488,24 @@ private fun TimePickerField(time: LocalTime, onSelect: (LocalTime) -> Unit, modi
         is24Hour      = true
     )
 
-    OutlinedTextField(
-        value         = time.format(fmt),
-        onValueChange = {},
-        readOnly      = true,
-        label         = { Text("Waktu") },
-        leadingIcon   = { Icon(Icons.Rounded.Schedule, null) },
-        shape         = RoundedCornerShape(14.dp),
-        colors        = inputColors(),
-        modifier      = modifier.clickable { showPicker = true }
-    )
+    Box(modifier = modifier) {
+        OutlinedTextField(
+            value         = time.format(fmt),
+            onValueChange = {},
+            readOnly      = true,
+            enabled       = false,
+            label         = { Text("Waktu") },
+            leadingIcon   = { Icon(Icons.Rounded.Schedule, null) },
+            shape         = RoundedCornerShape(14.dp),
+            colors        = inputColors(),
+            modifier      = Modifier.fillMaxWidth()
+        )
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .clickable { showPicker = true }
+        )
+    }
 
     if (showPicker) {
         AlertDialog(
@@ -533,11 +519,11 @@ private fun TimePickerField(time: LocalTime, onSelect: (LocalTime) -> Unit, modi
                     TimePicker(
                         state  = timeState,
                         colors = TimePickerDefaults.colors(
-                            clockDialColor             = Blue50,
-                            clockDialSelectedContentColor = White,
-                            selectorColor              = Blue700,
+                            clockDialColor                      = Blue50,
+                            clockDialSelectedContentColor       = White,
+                            selectorColor                       = Blue700,
                             periodSelectorSelectedContainerColor = Blue700,
-                            periodSelectorSelectedContentColor   = White
+                            periodSelectorSelectedContentColor  = White
                         )
                     )
                 }
@@ -567,5 +553,3 @@ private fun inputColors() = OutlinedTextFieldDefaults.colors(
     disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
     disabledLabelColor       = MaterialTheme.colorScheme.onSurfaceVariant
 )
-
-
